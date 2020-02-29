@@ -1,0 +1,183 @@
+{% load static %}
+{% load permission_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="{% static 'IS/main.css' %}">
+  <title>ИС Амарето</title>
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+      <div class="container">
+        <a class="navbar-brand mr-4" href="{% url 'IS-home' %}">ИС Амарето</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
+          aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarToggle">
+          <div class="navbar-nav mr-auto">
+            <a class="nav-item nav-link" href="{% url 'IS-home' %}">Главная</a>
+            <a class="nav-item nav-link" href="{% url 'IS-about' %}">О системе</a>
+          </div>
+          <!-- Navbar Right Side -->
+          <div class="navbar-nav">
+            {% if user.is_authenticated %}
+            <a class="nav-item nav-link" href="{% url 'profile' %}">Профиль</a>
+            <a class="nav-item nav-link" href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+            <a class="nav-item nav-link" href="{% url 'login' %}">Войти</a>
+            <a class="nav-item nav-link" href="{% url 'register' %}">Регистрация</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  {% if user.is_authenticated %}
+  <div class="row" id="body-row">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block col-2">
+      <!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+      <!-- Bootstrap List Group -->
+      <ul class="list-group sticky-top sticky-offset">
+        <!-- Separator with title -->
+        <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed">
+          <small>Главное меню</small>
+        </li>
+        <!-- /END Separator -->
+        <!-- Menu with submenu -->
+        <a href="{% url 'IS-home' %}" class="bg-dark list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-start align-items-center">
+            <span class="fa fa-tasks fa-fw mr-3"></span>
+            <span class="menu-collapsed">На главную</span>
+          </div>
+        </a>
+        <a href="#submenu2" data-toggle="collapse" aria-expanded="false"
+          class="bg-dark list-group-item list-group-item-action flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-start align-items-center dropdown-toggle">
+            <span class="fa fa-user fa-fw mr-3"></span>
+            <span class="menu-collapsed">Клиника</span>
+            <span class="submenu-icon ml-auto"></span>
+          </div>
+        </a>
+        <!-- Submenu content -->
+        <div id="submenu2" class="collapse sidebar-submenu">
+          {% if user|has_role:'director' %}
+          <a href="{% url 'clinic-create-edit' %}" class="list-group-item list-group-item-action bg-dark text-white">
+            <span class="menu-collapsed">Управление клиникой</span>
+          </a>
+          {% endif %}
+          {% if user.clinic_id != 0 %}
+          <a href="{% url 'doctors-list' %}" class="list-group-item list-group-item-action bg-dark text-white">
+            <span class="menu-collapsed">Доктора</span>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white">
+            <span class="menu-collapsed">Пациенты</span>
+          </a>
+          {% endif %}
+        </div>
+        <a href="{% url 'profile' %}" class="bg-dark list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-start align-items-center">
+            <span class="fa fa-tasks fa-fw mr-3"></span>
+            <span class="menu-collapsed">Профиль</span>
+          </div>
+        </a>
+        {% comment %}
+        <!-- Separator with title -->
+        <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed">
+          <small>OPTIONS</small>
+        </li> {% endcomment %}
+        <!-- /END Separator -->
+        <!-- Separator without title -->
+        <li class="list-group-item sidebar-separator menu-collapsed"></li>
+        <!-- /END Separator -->
+        <a href="#" class="bg-dark list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-start align-items-center">
+            <span class="fa fa-question fa-fw mr-3"></span>
+            <span class="menu-collapsed">Помощь</span>
+          </div>
+        </a>
+        <!-- Logo -->
+        <li class="list-group-item logo-separator d-flex justify-content-center">
+        </li>
+      </ul>
+      <!-- List Group END-->
+    </div>
+    {% endif %}
+
+    <!-- sidebar-container END -->
+    {% comment %} <main role="main" class="container">
+      <div class="d-flex justify-content-center"> {% endcomment %}
+      {% if not user.is_authenticated %}
+        <div class="d-flex justify-content-center">
+      {% else %}
+        <div class="col-md-6 offset-md-2">
+      {% endif %}
+          <div class="content-general ">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+              {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+          </div>
+        </div>
+        {% comment %} </div>
+    </main> {% endcomment %}
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <script>
+      // Hide submenus
+      $('#body-row .collapse').collapse('hide');
+
+      {% comment %} // Collapse/Expand icon
+      $('#collapse-icon').addClass('fa-angle-double-left');
+
+      // Collapse click
+      $('[data-toggle=sidebar-colapse]').click(function () {
+        SidebarCollapse();
+      }); {% endcomment %}
+
+      {% comment %}
+
+      function SidebarCollapse() {
+        $('.menu-collapsed').toggleClass('d-none');
+        $('.sidebar-submenu').toggleClass('d-none');
+        $('.submenu-icon').toggleClass('d-none');
+        $('#sidebar-container').toggleClass('sidebar-expanded sidebar-collapsed');
+
+        // Treating d-flex/d-none on separators with title
+        var SeparatorTitle = $('.sidebar-separator-title');
+        if (SeparatorTitle.hasClass('d-flex')) {
+          SeparatorTitle.removeClass('d-flex');
+        } else {
+          SeparatorTitle.addClass('d-flex');
+        }
+
+        // Collapse/Expand icon
+        $('#collapse-icon').toggleClass('fa-angle-double-left fa-angle-double-right');
+      } {% endcomment %}
+    </script>
+</body>
+
+</html>

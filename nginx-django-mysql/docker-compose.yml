@@ -1,0 +1,74 @@
+version: "3"
+
+services:
+  mysql:
+    container_name: mysql_MRI
+    image: mysql:5.7
+    # volumes:
+    #   - ./mysql:/var/lib/mysql
+    env_file:
+      - ./env/mysql_env
+    networks:
+      - mysql_net
+
+  mongodb:
+    container_name: mongodb_MRI
+    image: mongo:latest
+    env_file:
+      - ./env/mongodb_env
+    # volumes:
+    networks:
+      - mongodb_net
+
+  djangoapp:
+    container_name: django_MRI
+    build:
+      context: .
+      dockerfile: ./dev/django/Dockerfile
+    command:
+      [
+        "gunicorn",
+        "-c",
+        "gunicorn.py",
+        "--chdir",
+        "src",
+        "MRI_IS.wsgi:application"
+      ]
+    # volumes:
+    #   - django:/django
+    #   - django_static:/django/src/static
+    #   - django_media:/django/src/media
+    networks:
+      - mysql_net
+      - mongodb_net
+      - nginx_net
+    depends_on:
+      - mysql
+      - mongodb
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_MRI
+    build:
+      context: .
+      dockerfile: ./dev/nginx/Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    # volumes:
+    #   - django_static:/django/src/static
+    #   - django_media:/django/src/media
+    networks:
+      - nginx_net
+    depends_on:
+      - djangoapp
+
+networks:
+  mysql_net:
+    driver: bridge
+  mongodb_net:
+    driver: bridge
+  nginx_net:
+    driver: bridge
+
